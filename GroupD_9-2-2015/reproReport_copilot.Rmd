@@ -1,0 +1,264 @@
+---
+title: "Reproducibility Report"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+# Report Details
+
+```{r}
+articleID <- "9-2-2015"
+reportType <- "Pilot"
+pilotNames <- "Jackie Yang"
+copilotNames <- NA # # insert the co-pilot's name here e.g., "Michael Frank".
+pilotTTC <- NA # insert the pilot's estimated time to complete (in minutes, it is fine to approximate) e.g., 120
+copilotTTC <- 180 # insert the co-pilot's estimated time to complete (in minutes, it is fine to approximate) e.g., 120
+pilotStartDate <- as.Date("11/03/19", format = "%m/%d/%y")
+copilotStartDate <- NA # insert the co-piloting start date in US format e.g., as.Date("01/25/18", format = "%m/%d/%y")
+completionDate <- NA # insert the date of final report completion in US format e.g., as.Date("01/25/18", format = "%m/%d/%y")
+```
+
+------
+
+#### Methods summary: 
+
+I will do some simple statistics to confirm the ratios mentioned in the paper is correct. I will do chi-square test to confirm the statistics result from the paper.
+
+------
+
+#### Target outcomes: 
+
+> On the presurprise trials, 89% of responses in the location task were correct, which indicates that participants could easily locate the target by using the critical attribute. To analyze the data from the surprise trial, we first divided participants into two groups defined by the order of the surprise tasks (identity task first vs. color task first). We found that the results were almost the same in these two groups. Accordingly, we combined the data for these groups in the analyses reported here. Only 6 of 20 (30%) participants correctly reported the color of the target letter, which is not much better than chance level of 25% (because there were four choices). Furthermore, performance on the identity task (25% correct) was exactly at chance level. These results demonstrate that participants were not capable of reporting a task-relevant attribute of a stimulus that had reached awareness less than 1 s before (i.e., attribute amnesia). Moreover, in the surprise trial, participants’ performance on the location task, unlike their performance on the color and identity tasks, was good (80% correct), and in fact was approximately as good as their performance on the location task in the presurprise trials (89% correct). This indicates that the poor performance on the color and identity tasks was not induced by the surprise test itself; it more likely reflects participants’ failure to remember these attributes.
+
+> Participants exhibited a dramatic increase in reporting accuracy for the target letter’s color (70% correct) and identity (75% correct) on the first control trial (i.e., the trial immediately after the surprise trial). The improvement in each case was significant—color: 70% versus 30%, χ2(1, N = 40) = 6.40, p = .011, ϕ = .40; identity: 75% versus 25%, χ2(1, N = 40) = 10.00, p < .005, ϕ = .50. Performance on these two tasks remained constant on the final three control trials (color: 75%, 70%, and 80% correct; identity: 75%, 80%, and 75% correct). Participants’ performance on the location task was almost the same on the surprise trial (80% correct) as on the control trials (80%, 85%, 80%, and 70% correct). These results indicate a crucial role for expectation in controlling participants’ ability to report the attributes of a consciously perceived object. Therefore, Experiment 1a showed that when participants did not expect to report a particular attribute of an attended object, they were incapable of doing so, even when that same attribute had reached awareness immediately prior to the test.
+
+------
+
+```{r global_options, include=FALSE}
+# sets up some formatting options for the R Markdown document
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+# Step 1: Load packages and prepare report object
+
+```{r}
+# load packages
+library(tidyverse) # for data munging
+library(knitr) # for kable table formating
+library(haven) # import and export 'SPSS', 'Stata' and 'SAS' Files
+library(readxl) # import excel files
+library(ReproReports) # custom reporting functions
+library(reticulate)
+use_python('/usr/local/bin/python3')
+```
+
+```{r}
+# Prepare report object. This will be updated automatically by the reproCheck function each time values are compared
+reportObject <- data.frame(dummyRow = TRUE, reportedValue = NA, obtainedValue = NA, valueType = NA, percentageError = NA, comparisonOutcome = NA, eyeballCheck = NA)
+```
+
+# Step 2: Load data
+
+```{python}
+import pandas as pd
+raw_data = pd.read_csv('data/materials-9859-Top-level_materials/12022-Exp1.csv', names=[
+    'sub_id', 'block_id', 'trial_id',
+    'color_target', 'identity_target', 'location_target',
+    'color_response', 'identity_response', 'location_response',
+    'color_accuracy', 'identity_accuracy', 'location_accuracy'
+])
+```
+
+# Step 3: Tidy data
+
+```{python}
+```
+
+# Step 4: Run analysis
+
+## Pre-processing
+
+```{python}
+processed_data = raw_data.copy()
+processed_data['presuprise'] = (processed_data.trial_id < 156)
+processed_data['suprise'] = (processed_data.trial_id == 156)
+processed_data['control'] = (processed_data.trial_id > 156)
+processed_data['control_id'] = processed_data.trial_id - 156
+```
+
+## Descriptive statistics
+
+There are a lot of descriptive stats in this section of the paper, all of them are describing the proportion of correct answer in differed conditons.
+
+```{python}
+#%%
+presuprise_trials = processed_data[processed_data.presuprise]
+presuprise_location_accuracy = presuprise_trials.location_accuracy.mean()
+print(f"On the presurprise trials, {presuprise_location_accuracy * 100}% of responses "
+      f"in the location task were correct")
+r.reproCheck(reportedValue='0.89', obtainedValue=presuprise_location_accuracy, valueType='n')
+
+#%%
+suprise_trials = processed_data[processed_data.suprise]
+suprise_color_accuracy = suprise_trials.color_accuracy.mean()
+suprise_color_total = suprise_trials.color_accuracy.count()
+suprise_color_correct = suprise_trials.color_accuracy.sum()
+print(f"Only {suprise_color_correct} of {suprise_color_total} ({suprise_color_accuracy * 100}%) "
+      f"participants correctly reported the color of the target letter")
+r.reproCheck(reportedValue='0.30', obtainedValue=suprise_color_accuracy, valueType='n')
+
+#%%
+suprise_trials = processed_data[processed_data.suprise]
+suprise_identity_accuracy = suprise_trials.identity_accuracy.mean()
+suprise_identity_total = suprise_trials.identity_accuracy.count()
+suprise_identity_correct = suprise_trials.identity_accuracy.sum()
+print(f"Furthermore, performance on the identity task "
+      f"({suprise_identity_accuracy * 100}% correct) was exactly at chance level.")
+r.reproCheck(reportedValue='0.25', obtainedValue=suprise_identity_accuracy, valueType='n')
+
+#%%
+suprise_trials = processed_data[processed_data.suprise]
+suprise_location_accuracy = suprise_trials.location_accuracy.mean()
+print(f"Participants’ performance on the location task was good ({suprise_location_accuracy * 100}% correct)")
+r.reproCheck(reportedValue='0.80', obtainedValue=suprise_location_accuracy, valueType='n')
+
+#%%
+first_control_trials = processed_data[processed_data.control_id == 1]
+first_control_color_accuracy = first_control_trials.color_accuracy.mean()
+first_control_color_total = first_control_trials.color_accuracy.count()
+first_control_color_correct = first_control_trials.color_accuracy.sum()
+first_control_identity_accuracy = first_control_trials.identity_accuracy.mean()
+first_control_identity_total = first_control_trials.identity_accuracy.count()
+first_control_identity_correct = first_control_trials.identity_accuracy.sum()
+print(f"Participants exhibited a dramatic increase in reporting accuracy for "
+      f"the target letter’s color ({first_control_color_accuracy * 100}% correct) "
+      f"and identity ({first_control_identity_accuracy * 100}% correct) on the first control trial")
+r.reproCheck(reportedValue='0.70', obtainedValue=first_control_color_accuracy, valueType='n')
+r.reproCheck(reportedValue='0.75', obtainedValue=first_control_identity_accuracy, valueType='n')
+
+#%%
+last_control_trials = [processed_data[processed_data.control_id == i] for i in [2, 3, 4]]
+last_control_color_accuracy_array = [trial.color_accuracy.mean() for trial in last_control_trials]
+last_control_identity_accuracy_array = [trial.identity_accuracy.mean() for trial in last_control_trials]
+print(f"Performance on these two tasks remained constant on the final three control trials "
+      f"(color: {last_control_color_accuracy_array[0] * 100}%, "
+      f"{last_control_color_accuracy_array[1] * 100}%, and "
+      f"{last_control_color_accuracy_array[2] * 100}% correct; "
+      f"identity: {last_control_identity_accuracy_array[0] * 100}%, "
+      f"{last_control_identity_accuracy_array[1] * 100}%, and "
+      f"{last_control_identity_accuracy_array[2] * 100}% correct). ")
+r.reproCheck(reportedValue='0.75', obtainedValue=last_control_color_accuracy_array[0], valueType='n')
+r.reproCheck(reportedValue='0.70', obtainedValue=last_control_color_accuracy_array[1], valueType='n')
+r.reproCheck(reportedValue='0.80', obtainedValue=last_control_color_accuracy_array[2], valueType='n')
+r.reproCheck(reportedValue='0.75', obtainedValue=last_control_identity_accuracy_array[0], valueType='n')
+r.reproCheck(reportedValue='0.80', obtainedValue=last_control_identity_accuracy_array[1], valueType='n')
+r.reproCheck(reportedValue='0.75', obtainedValue=last_control_identity_accuracy_array[2], valueType='n')
+
+#%%
+all_control_trials = [processed_data[processed_data.control_id == i] for i in [1, 2, 3, 4]]
+all_control_location_accuracy_array = [trial.location_accuracy.mean() for trial in all_control_trials]
+print(f"Participants’ performance on the location task was almost the "
+      f"same on the surprise trial ({suprise_location_accuracy * 100}% correct) as on the control trials "
+      f"({all_control_location_accuracy_array[0] * 100}%, {all_control_location_accuracy_array[1] * 100}%, "
+      f"{all_control_location_accuracy_array[2] * 100}%, and {all_control_location_accuracy_array[3] * 100}% correct).")
+r.reproCheck(reportedValue='0.80', obtainedValue=all_control_location_accuracy_array[0], valueType='n')
+r.reproCheck(reportedValue='0.85', obtainedValue=all_control_location_accuracy_array[1], valueType='n')
+r.reproCheck(reportedValue='0.80', obtainedValue=all_control_location_accuracy_array[2], valueType='n')
+r.reproCheck(reportedValue='0.70', obtainedValue=all_control_location_accuracy_array[3], valueType='n')
+```
+
+## Inferential statistics
+
+The two major inferential stats in the paper is about the improvement on subjects' ability to identify the letter's color and identity after the first suprise trial. 
+
+I had some trouble to create the same chi-square test result in Python as the same in R.
+It turns out that `scipy.stats.chi2_contingency` with `correction=False` is roughly equal to `chisq.test` in R.
+
+```{python}
+#%%
+import scipy.stats
+import math
+
+#%%
+scipy.stats.chisquare([suprise_color_correct, first_control_color_correct],
+)
+
+#%%
+chi2, p, dof, _ = scipy.stats.chi2_contingency(
+    [
+        [suprise_color_correct, first_control_color_correct],
+        [suprise_color_total - suprise_color_correct, first_control_color_total - first_control_color_correct]
+    ], correction=False
+)
+total = suprise_color_total + first_control_color_total
+phi = math.sqrt(chi2 / total)
+
+print(f"color: {first_control_color_accuracy * 100}% versus {suprise_color_accuracy * 100}%, "
+      f"χ2({dof}, N = {total}) = {chi2}, p = {p}, ϕ = {phi};")
+r.reproCheck(reportedValue='6.4', obtainedValue=chi2, valueType='x2')
+r.reproCheck(reportedValue='0.011', obtainedValue=p, valueType='p')
+r.reproCheck(reportedValue='0.4', obtainedValue=phi, valueType='phi')
+
+#%%
+chi2, p, dof, _ = scipy.stats.chi2_contingency(
+    [
+        [suprise_identity_correct, first_control_identity_correct],
+        [suprise_identity_total - suprise_identity_correct, 
+         first_control_identity_total - first_control_identity_correct]
+    ], correction=False
+)
+total = suprise_identity_total + first_control_identity_total
+phi = math.sqrt(chi2 / total)
+
+print(f"identity: {first_control_identity_accuracy * 100}% versus {suprise_identity_accuracy * 100}%, "
+      f"χ2({dof}, N = {total}) = {chi2}, p = {p}, ϕ = {phi};")
+r.reproCheck(reportedValue='10.0', obtainedValue=chi2, valueType='x2')
+r.reproCheck(reportedValue='<0.005', obtainedValue=p, valueType='p', eyeballCheck=True)
+r.reproCheck(reportedValue='0.5', obtainedValue=phi, valueType='phi')
+```
+
+# Step 5: Conclusion
+
+This reproduction is a success, I can reproduce every one of the descriptive and inferential statistics.
+
+```{r}
+reportObject <- reportObject %>%
+  filter(dummyRow == FALSE) %>% # remove the dummy row
+  select(-dummyRow) %>% # remove dummy row designation
+  mutate(articleID = articleID) %>% # add variables to report 
+  select(articleID, everything()) # make articleID first column
+
+# decide on final outcome
+if(any(reportObject$comparisonOutcome %in% c("MAJOR_ERROR", "DECISION_ERROR"))){
+  finalOutcome <- "Failure"
+}else{
+  finalOutcome <- "Success"
+}
+
+# collate report extra details
+reportExtras <- data.frame(articleID, pilotNames, copilotNames, pilotTTC, copilotTTC, pilotStartDate, copilotStartDate, completionDate, finalOutcome)
+
+# save report objects
+if(reportType == "pilot"){
+  write_csv(reportObject, "pilotReportDetailed.csv")
+  write_csv(reportExtras, "pilotReportExtras.csv")
+}
+
+if(reportType == "copilot"){
+  write_csv(reportObject, "copilotReportDetailed.csv")
+  write_csv(reportExtras, "copilotReportExtras.csv")
+}
+```
+
+# Session information
+
+```{r session_info, include=TRUE, echo=TRUE, results='markup'}
+devtools::session_info()
+```
+
+```{python}
+from sinfo import sinfo
+sinfo()
+```

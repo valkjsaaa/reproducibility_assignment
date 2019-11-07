@@ -1622,12 +1622,12 @@ print(f&quot;Furthermore, performance on the identity task &quot;
 suprise_location_accuracy = suprise_trials.location_accuracy.mean()
 print(f&quot;Participants’ performance on the location task was good ({suprise_location_accuracy * 100}% correct)&quot;)</code></pre>
 <pre><code>## Participants’ performance on the location task was good (80.0% correct)</code></pre>
-<pre class="python"><code>r.reproCheck(reportedValue='0.25', obtainedValue=suprise_identity_accuracy, valueType='n')
+<pre class="python"><code>r.reproCheck(reportedValue='0.80', obtainedValue=suprise_location_accuracy, valueType='n')
 
 #%%</code></pre>
 <pre><code>##    dummyRow  reportedValue  ...  comparisonOutcome eyeballCheck
 ## 0      True            NaN  ...                 NA         True
-## 1     False           0.25  ...              MATCH         True
+## 1     False            0.8  ...              MATCH         True
 ## 
 ## [2 rows x 7 columns]</code></pre>
 <pre class="python"><code>first_control_trials = processed_data[processed_data.control_id == 1]
@@ -2020,7 +2020,7 @@ sinfo()</code></pre>
 ## Windows-10-10.0.17763-SP0
 ## 8 logical CPU cores, Intel64 Family 6 Model 158 Stepping 9, GenuineIntel
 ## -----
-## Session information updated at 2019-11-07 13:22</code></pre>
+## Session information updated at 2019-11-07 13:37</code></pre>
 </div>
 
 
