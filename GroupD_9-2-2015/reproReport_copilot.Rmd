@@ -12,12 +12,12 @@ output:
 articleID <- "9-2-2015"
 reportType <- "Pilot"
 pilotNames <- "Jackie Yang"
-copilotNames <- NA # # insert the co-pilot's name here e.g., "Michael Frank".
+copilotNames <- "Jacob William Keith Ritchie" # # insert the co-pilot's name here e.g., "Michael Frank".
 pilotTTC <- NA # insert the pilot's estimated time to complete (in minutes, it is fine to approximate) e.g., 120
-copilotTTC <- 180 # insert the co-pilot's estimated time to complete (in minutes, it is fine to approximate) e.g., 120
+copilotTTC <- 30 # insert the co-pilot's estimated time to complete (in minutes, it is fine to approximate) e.g., 120
 pilotStartDate <- as.Date("11/03/19", format = "%m/%d/%y")
-copilotStartDate <- NA # insert the co-piloting start date in US format e.g., as.Date("01/25/18", format = "%m/%d/%y")
-completionDate <- NA # insert the date of final report completion in US format e.g., as.Date("01/25/18", format = "%m/%d/%y")
+copilotStartDate <- as.Date("11/07/19", format = "%m/%d/%y") # insert the co-piloting start date in US format e.g., as.Date("01/25/18", format = "%m/%d/%y")
+completionDate <- as.Date("11/07/19", format = "%m/%d/%y") # insert the date of final report completion in US format e.g., as.Date("01/25/18", format = "%m/%d/%y")
 ```
 
 ------
